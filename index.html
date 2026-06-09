@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Radar de Practicas BUAP</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #17202a;
+      --muted: #65717f;
+      --line: #d8e0e8;
+      --paper: #f6f8fb;
+      --panel: #ffffff;
+      --accent: #0d7a75;
+      --accent-2: #b73855;
+      --amber: #b27618;
+      --good: #28724f;
+      --shadow: 0 14px 40px rgba(21, 31, 42, .10);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(13, 122, 117, .10), transparent 360px),
+        var(--paper);
+    }
+
+    button, input, textarea, select { font: inherit; }
+
+    .app-shell {
+      width: min(1360px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 36px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: end;
+      padding: 10px 0 22px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 48px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      max-width: 780px;
+      font-size: 16px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--ink);
+      height: 40px;
+      min-width: 40px;
+      border-radius: var(--radius);
+      padding: 0 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 1px 0 rgba(0,0,0,.03);
+      white-space: nowrap;
+    }
+
+    .btn:hover { border-color: #aebbc7; }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: white; }
+    .btn.danger { color: #a52842; }
+    .btn.icon { padding: 0; width: 40px; }
+    .btn.small {
+      height: 34px;
+      min-width: 0;
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(320px, 420px) 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel, .stats, .table-wrap, .compare-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 18px; }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: #2b3743;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      padding: 10px 11px;
+      min-height: 40px;
+      outline: none;
+    }
+
+    textarea { resize: vertical; min-height: 82px; }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(13, 122, 117, .14);
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      padding-top: 2px;
+    }
+
+    .workspace {
+      display: grid;
+      gap: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      overflow: hidden;
+    }
+
+    .stat {
+      padding: 14px 16px;
+      border-right: 1px solid var(--line);
+      min-width: 0;
+    }
+
+    .stat:last-child { border-right: 0; }
+    .stat strong { display: block; font-size: 24px; line-height: 1.1; }
+    .stat span { color: var(--muted); font-size: 12px; }
+
+    .filters {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) 180px 160px;
+      gap: 10px;
+    }
+
+    .table-wrap { overflow-x: auto; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 920px;
+    }
+
+    th, td {
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      font-size: 14px;
+    }
+
+    th {
+      color: #43515f;
+      font-size: 12px;
+      background: #f0f4f7;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    .company { font-weight: 750; }
+    .muted { color: var(--muted); }
+    .nowrap { white-space: nowrap; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 750;
+      background: #eaf3f2;
+      color: #08635f;
+      white-space: nowrap;
+    }
+
+    .pill.high { background: #ffe9ec; color: #a52842; }
+    .pill.medium { background: #fff2d9; color: #8a5a0a; }
+    .pill.low { background: #e9f5ef; color: #236643; }
+
+    .row-actions {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .compare-panel {
+      padding: 14px;
+      display: none;
+    }
+
+    .compare-panel.active { display: block; }
+
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .compare-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 12px;
+      background: #fbfcfd;
+    }
+
+    .compare-card strong { display: block; margin-bottom: 8px; }
+
+    .empty {
+      padding: 32px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .notice {
+      min-height: 30px;
+      color: var(--good);
+      font-size: 13px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 980px) {
+      header, .layout { grid-template-columns: 1fr; }
+      .toolbar { justify-content: flex-start; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat:nth-child(2) { border-right: 0; }
+      .stat:nth-child(-n + 2) { border-bottom: 1px solid var(--line); }
+      .filters { grid-template-columns: 1fr; }
+      .table-wrap { overflow-x: auto; }
+    }
+
+    @media (max-width: 560px) {
+      .app-shell { width: min(100% - 20px, 1360px); padding-top: 14px; }
+      .field-grid { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: 1fr; }
+      .stat { border-right: 0; border-bottom: 1px solid var(--line); }
+      .stat:last-child { border-bottom: 0; }
+      .toolbar .btn:not(.primary) { flex: 1 1 48%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header>
+      <div>
+        <h1>Radar de Practicas BUAP</h1>
+        <p class="subtitle">Captura las empresas que te interesan, filtra por dificultad o ubicacion, compara opciones y genera un link de lectura para compartirlo.</p>
+      </div>
+      <div class="toolbar" aria-label="Acciones generales">
+        <button class="btn" id="importBtn" type="button" title="Importar JSON">Importar</button>
+        <button class="btn" id="exportBtn" type="button" title="Descargar respaldo JSON">Exportar</button>
+        <button class="btn primary" id="shareBtn" type="button" title="Copiar enlace con datos">Compartir link</button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <aside class="panel">
+        <h2 id="formTitle">Nueva practica</h2>
+        <form id="practiceForm">
+          <input type="hidden" id="recordId">
+          <label>
+            Empresa
+            <input id="empresa" autocomplete="organization" required placeholder="Nombre de la empresa">
+          </label>
+          <label>
+            Actividad a realizar
+            <textarea id="actividad" required placeholder="Describe las tareas principales"></textarea>
+          </label>
+          <div class="field-grid">
+            <label>
+              Folio
+              <input id="folio" placeholder="Ej. PP-2026-001">
+            </label>
+            <label>
+              Dificultad
+              <select id="dificultad">
+                <option>Baja</option>
+                <option selected>Media</option>
+                <option>Alta</option>
+              </select>
+            </label>
+          </div>
+          <div class="field-grid">
+            <label>
+              Apoyo economico
+              <input id="apoyo" type="number" min="0" step="1" placeholder="Cantidad mensual">
+            </label>
+            <label>
+              Prestadores
+              <input id="prestadores" type="number" min="1" step="1" placeholder="Num. lugares">
+            </label>
+          </div>
+          <div class="field-grid">
+            <label>
+              Duracion
+              <input id="duracion" placeholder="Ej. 6 meses / 480 horas">
+            </label>
+            <label>
+              Ubicacion
+              <input id="ubicacion" placeholder="Ciudad, colonia o remoto">
+            </label>
+          </div>
+          <label>
+            Datos de la empresa
+            <textarea id="datos" placeholder="Contacto, giro, correo, telefono, requisitos"></textarea>
+          </label>
+          <label>
+            Estado personal
+            <select id="estado">
+              <option selected>Me interesa</option>
+              <option>Por investigar</option>
+              <option>Contactada</option>
+              <option>Descartada</option>
+            </select>
+          </label>
+          <div class="notice" id="notice" role="status"></div>
+          <div class="form-actions">
+            <button class="btn hidden" id="cancelEditBtn" type="button">Cancelar</button>
+            <button class="btn primary" type="submit">Guardar</button>
+          </div>
+        </form>
+      </aside>
+
+      <section class="workspace" aria-label="Practicas capturadas">
+        <div class="stats">
+          <div class="stat"><strong id="totalCount">0</strong><span>opciones</span></div>
+          <div class="stat"><strong id="avgAid">$0</strong><span>apoyo promedio</span></div>
+          <div class="stat"><strong id="placesCount">0</strong><span>lugares disponibles</span></div>
+          <div class="stat"><strong id="topDifficulty">-</strong><span>dificultad mas comun</span></div>
+        </div>
+
+        <div class="filters" aria-label="Filtros">
+          <input id="search" placeholder="Buscar empresa, folio, actividad, ubicacion...">
+          <select id="difficultyFilter">
+            <option value="">Todas las dificultades</option>
+            <option>Baja</option>
+            <option>Media</option>
+            <option>Alta</option>
+          </select>
+          <select id="sortBy">
+            <option value="createdDesc">Mas recientes</option>
+            <option value="apoyoDesc">Mayor apoyo</option>
+            <option value="prestadoresDesc">Mas lugares</option>
+            <option value="empresaAsc">Empresa A-Z</option>
+            <option value="dificultadAsc">Menor dificultad</option>
+          </select>
+        </div>
+
+        <section class="compare-panel" id="comparePanel">
+          <h2>Comparacion rapida</h2>
+          <div class="compare-grid" id="compareGrid"></div>
+        </section>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th aria-label="Seleccionar para comparar">Comparar</th>
+                <th>Acciones</th>
+                <th data-sort="empresaAsc">Empresa</th>
+                <th>Actividad</th>
+                <th>Folio</th>
+                <th data-sort="dificultadAsc">Dificultad</th>
+                <th data-sort="apoyoDesc">Apoyo</th>
+                <th data-sort="prestadoresDesc">Prestadores</th>
+                <th>Duracion</th>
+                <th>Ubicacion</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+          <div class="empty" id="emptyState">Todavia no hay practicas guardadas.</div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <input class="hidden" id="fileInput" type="file" accept="application/json">
+
+  <script>
+    const STORAGE_KEY = "radar-practicas-buap-v1";
+    const fields = ["empresa", "actividad", "folio", "dificultad", "apoyo", "prestadores", "datos", "duracion", "ubicacion", "estado"];
+    const difficultyScore = { Baja: 1, Media: 2, Alta: 3 };
+    let practices = [];
+    let compareIds = new Set();
+
+    const $ = (id) => document.getElementById(id);
+    const money = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 });
+
+    function uid() {
+      return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
+    }
+
+    function loadData() {
+      const hashData = location.hash.startsWith("#data=") ? location.hash.slice(6) : "";
+      if (hashData) {
+        try {
+          practices = JSON.parse(decodeURIComponent(escape(atob(hashData))));
+          saveData();
+          history.replaceState(null, "", location.pathname);
+          showNotice("Datos importados desde el link compartido.");
+          return;
+        } catch (error) {
+          showNotice("No se pudo leer el link compartido.");
+        }
+      }
+
+      const saved = localStorage.getItem(STORAGE_KEY);
+      practices = saved ? JSON.parse(saved) : sampleData();
+      saveData();
+    }
+
+    function sampleData() {
+      return [{
+        id: uid(),
+        empresa: "Ejemplo: Area de Sistemas",
+        actividad: "Apoyo en documentacion, soporte tecnico y seguimiento de tickets internos.",
+        folio: "BUAP-DEMO",
+        dificultad: "Media",
+        apoyo: 1500,
+        prestadores: 2,
+        datos: "Contacto pendiente. Requisitos: disponibilidad matutina.",
+        duracion: "480 horas",
+        ubicacion: "Puebla, presencial",
+        estado: "Por investigar",
+        createdAt: Date.now()
+      }];
+    }
+
+    function saveData() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(practices));
+    }
+
+    function showNotice(message) {
+      $("notice").textContent = message;
+      window.clearTimeout(showNotice.timer);
+      showNotice.timer = window.setTimeout(() => $("notice").textContent = "", 2600);
+    }
+
+    function getFormRecord() {
+      const record = {};
+      fields.forEach((field) => {
+        const value = $(field).value.trim();
+        record[field] = ["apoyo", "prestadores"].includes(field) ? Number(value || 0) : value;
+      });
+      return record;
+    }
+
+    function fillForm(record) {
+      $("recordId").value = record.id || "";
+      fields.forEach((field) => $(field).value = record[field] ?? "");
+      $("formTitle").textContent = record.id ? "Editar practica" : "Nueva practica";
+      $("cancelEditBtn").classList.toggle("hidden", !record.id);
+      $("empresa").focus();
+    }
+
+    function resetForm() {
+      $("practiceForm").reset();
+      $("recordId").value = "";
+      $("dificultad").value = "Media";
+      $("estado").value = "Me interesa";
+      $("formTitle").textContent = "Nueva practica";
+      $("cancelEditBtn").classList.add("hidden");
+    }
+
+    function filteredPractices() {
+      const query = $("search").value.trim().toLowerCase();
+      const difficulty = $("difficultyFilter").value;
+      const sortBy = $("sortBy").value;
+
+      const result = practices.filter((item) => {
+        const matchesDifficulty = !difficulty || item.dificultad === difficulty;
+        const haystack = [item.empresa, item.actividad, item.folio, item.datos, item.duracion, item.ubicacion, item.estado].join(" ").toLowerCase();
+        return matchesDifficulty && (!query || haystack.includes(query));
+      });
+
+      result.sort((a, b) => {
+        if (sortBy === "apoyoDesc") return (b.apoyo || 0) - (a.apoyo || 0);
+        if (sortBy === "prestadoresDesc") return (b.prestadores || 0) - (a.prestadores || 0);
+        if (sortBy === "empresaAsc") return a.empresa.localeCompare(b.empresa, "es");
+        if (sortBy === "dificultadAsc") return (difficultyScore[a.dificultad] || 0) - (difficultyScore[b.dificultad] || 0);
+        return (b.createdAt || 0) - (a.createdAt || 0);
+      });
+
+      return result;
+    }
+
+    function renderStats() {
+      const total = practices.length;
+      const aids = practices.map((item) => Number(item.apoyo || 0)).filter(Boolean);
+      const places = practices.reduce((sum, item) => sum + Number(item.prestadores || 0), 0);
+      const counts = practices.reduce((acc, item) => {
+        acc[item.dificultad] = (acc[item.dificultad] || 0) + 1;
+        return acc;
+      }, {});
+      const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
+
+      $("totalCount").textContent = total;
+      $("avgAid").textContent = aids.length ? money.format(aids.reduce((a, b) => a + b, 0) / aids.length) : "$0";
+      $("placesCount").textContent = places;
+      $("topDifficulty").textContent = top;
+    }
+
+    function difficultyClass(value) {
+      return value === "Alta" ? "high" : value === "Media" ? "medium" : "low";
+    }
+
+    function renderTable() {
+      const rows = filteredPractices();
+      $("emptyState").classList.toggle("hidden", rows.length > 0);
+      $("tableBody").innerHTML = rows.map((item) => `
+        <tr>
+          <td class="nowrap">
+            <input type="checkbox" aria-label="Comparar ${escapeHtml(item.empresa)}" data-compare="${item.id}" ${compareIds.has(item.id) ? "checked" : ""}>
+          </td>
+          <td>
+            <div class="row-actions">
+              <button class="btn small" type="button" data-edit="${item.id}" title="Editar">Editar</button>
+              <button class="btn small danger" type="button" data-delete="${item.id}" title="Eliminar">Eliminar</button>
+            </div>
+          </td>
+          <td><div class="company">${escapeHtml(item.empresa)}</div><div class="muted">${escapeHtml(item.datos || "")}</div></td>
+          <td>${escapeHtml(item.actividad)}</td>
+          <td class="nowrap">${escapeHtml(item.folio || "-")}</td>
+          <td><span class="pill ${difficultyClass(item.dificultad)}">${escapeHtml(item.dificultad)}</span></td>
+          <td class="nowrap">${item.apoyo ? money.format(item.apoyo) : "-"}</td>
+          <td>${item.prestadores || "-"}</td>
+          <td>${escapeHtml(item.duracion || "-")}</td>
+          <td>${escapeHtml(item.ubicacion || "-")}</td>
+          <td>${escapeHtml(item.estado || "-")}</td>
+        </tr>
+      `).join("");
+      renderCompare();
+    }
+
+    function renderCompare() {
+      const selected = practices.filter((item) => compareIds.has(item.id));
+      $("comparePanel").classList.toggle("active", selected.length > 0);
+      $("compareGrid").innerHTML = selected.map((item) => `
+        <article class="compare-card">
+          <strong>${escapeHtml(item.empresa)}</strong>
+          <div>Apoyo: ${item.apoyo ? money.format(item.apoyo) : "-"}</div>
+          <div>Dificultad: ${escapeHtml(item.dificultad)}</div>
+          <div>Prestadores: ${item.prestadores || "-"}</div>
+          <div>Duracion: ${escapeHtml(item.duracion || "-")}</div>
+          <div>Ubicacion: ${escapeHtml(item.ubicacion || "-")}</div>
+        </article>
+      `).join("");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[char]);
+    }
+
+    function render() {
+      renderStats();
+      renderTable();
+    }
+
+    $("practiceForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const record = getFormRecord();
+      const id = $("recordId").value;
+      if (id) {
+        practices = practices.map((item) => item.id === id ? { ...item, ...record } : item);
+        showNotice("Practica actualizada.");
+      } else {
+        practices.unshift({ id: uid(), ...record, createdAt: Date.now() });
+        showNotice("Practica guardada.");
+      }
+      saveData();
+      resetForm();
+      render();
+    });
+
+    $("cancelEditBtn").addEventListener("click", resetForm);
+
+    $("tableBody").addEventListener("click", (event) => {
+      const editId = event.target.closest("[data-edit]")?.dataset.edit;
+      const deleteId = event.target.closest("[data-delete]")?.dataset.delete;
+      if (editId) fillForm(practices.find((item) => item.id === editId));
+      if (deleteId && confirm("Eliminar esta practica?")) {
+        practices = practices.filter((item) => item.id !== deleteId);
+        compareIds.delete(deleteId);
+        saveData();
+        render();
+      }
+    });
+
+    $("tableBody").addEventListener("change", (event) => {
+      const id = event.target.dataset.compare;
+      if (!id) return;
+      event.target.checked ? compareIds.add(id) : compareIds.delete(id);
+      renderCompare();
+    });
+
+    ["search", "difficultyFilter", "sortBy"].forEach((id) => $(id).addEventListener("input", renderTable));
+
+    document.querySelectorAll("th[data-sort]").forEach((th) => {
+      th.addEventListener("click", () => {
+        $("sortBy").value = th.dataset.sort;
+        renderTable();
+      });
+    });
+
+    $("exportBtn").addEventListener("click", () => {
+      const blob = new Blob([JSON.stringify(practices, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "practicas-buap.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    $("importBtn").addEventListener("click", () => $("fileInput").click());
+
+    $("fileInput").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const imported = JSON.parse(await file.text());
+        if (!Array.isArray(imported)) throw new Error("Formato invalido");
+        practices = imported.map((item) => ({ id: item.id || uid(), createdAt: item.createdAt || Date.now(), ...item }));
+        saveData();
+        compareIds = new Set();
+        render();
+        showNotice("Archivo importado.");
+      } catch (error) {
+        alert("No se pudo importar el archivo JSON.");
+      } finally {
+        event.target.value = "";
+      }
+    });
+
+    $("shareBtn").addEventListener("click", async () => {
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(practices))));
+      const url = `${location.origin}${location.pathname}#data=${encoded}`;
+      try {
+        await navigator.clipboard.writeText(url);
+        showNotice("Link copiado. Si subes este HTML a la web, el link podra abrirse en otro equipo.");
+      } catch (error) {
+        prompt("Copia este link:", url);
+      }
+    });
+
+    loadData();
+    render();
+  </script>
+</body>
+</html>
