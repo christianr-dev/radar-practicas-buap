@@ -451,15 +451,61 @@
     const $ = (id) => document.getElementById(id);
     const money = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 });
 
+    function bytesToBase64Url(bytes) {
+      let binary = "";
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+      }
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    function base64UrlToBytes(value) {
+      const base64 = value.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((value.length + 3) % 4);
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    }
+
     function uid() {
       return crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random());
     }
 
-    function loadData() {
+    async function encodeShareData(value) {
+      const json = JSON.stringify(value);
+      const encoded = new TextEncoder().encode(json);
+      if (window.CompressionStream) {
+        const compressed = await new Response(
+          new Blob([encoded]).stream().pipeThrough(new CompressionStream("gzip"))
+        ).arrayBuffer();
+        return `gz:${bytesToBase64Url(new Uint8Array(compressed))}`;
+      }
+      return `b64:${bytesToBase64Url(encoded)}`;
+    }
+
+    async function decodeShareData(value) {
+      if (value.startsWith("gz:")) {
+        const compressed = base64UrlToBytes(value.slice(3));
+        if (!window.DecompressionStream) throw new Error("Decompression not supported");
+        const text = await new Response(
+          new Blob([compressed]).stream().pipeThrough(new DecompressionStream("gzip"))
+        ).text();
+        return JSON.parse(text);
+      }
+      if (value.startsWith("b64:")) {
+        return JSON.parse(new TextDecoder().decode(base64UrlToBytes(value.slice(4))));
+      }
+      return JSON.parse(decodeURIComponent(escape(atob(value))));
+    }
+
+    async function loadData() {
       const hashData = location.hash.startsWith("#data=") ? location.hash.slice(6) : "";
       if (hashData) {
         try {
-          practices = JSON.parse(decodeURIComponent(escape(atob(hashData))));
+          practices = await decodeShareData(hashData);
           saveData();
           history.replaceState(null, "", location.pathname);
           showNotice("Datos importados desde el link compartido.");
@@ -689,11 +735,14 @@
       const file = event.target.files[0];
       if (!file) return;
       try {
-        const imported = JSON.parse(await file.text());
+        const raw = await file.text();
+        await new Promise(requestAnimationFrame);
+        const imported = JSON.parse(raw);
         if (!Array.isArray(imported)) throw new Error("Formato invalido");
         practices = imported.map((item) => ({ id: item.id || uid(), createdAt: item.createdAt || Date.now(), ...item }));
         saveData();
         compareIds = new Set();
+        await new Promise(requestAnimationFrame);
         render();
         showNotice("Archivo importado.");
       } catch (error) {
@@ -704,18 +753,17 @@
     });
 
     $("shareBtn").addEventListener("click", async () => {
-      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(practices))));
+      const encoded = await encodeShareData(practices);
       const url = `${location.origin}${location.pathname}#data=${encoded}`;
       try {
         await navigator.clipboard.writeText(url);
-        showNotice("Link copiado. Si subes este HTML a la web, el link podra abrirse en otro equipo.");
+        showNotice("Link copiado en formato comprimido.");
       } catch (error) {
         prompt("Copia este link:", url);
       }
     });
 
-    loadData();
-    render();
+    loadData().then(render);
   </script>
 </body>
 </html>
